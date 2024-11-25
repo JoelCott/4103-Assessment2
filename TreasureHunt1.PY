@@ -25,7 +25,7 @@ class Player:
             #if can go up, if y != 0  
             #remove old position from grid - set x and y = ' ' 
             #then -1 update player self y
-            #update grid with new position
+            #update grid with new position displaygrid()
             print("up")
         elif direction == "down":
             print("down")
