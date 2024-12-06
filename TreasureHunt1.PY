@@ -4,6 +4,8 @@ from enum import Enum
 
 gridMap = []
 players = []
+treasure = []
+treasureCount = 0 
 playerHealth = 5
 
 class Player:
@@ -19,57 +21,69 @@ class Player:
     def getY(self):
         return self.y
     
-    def movePlayer(direction, playerID):
-        if direction == "up":
-            #for each direction 
-            #if can go up, if y != 0  
-            #remove old position from grid - set x and y = ' ' 
-            #then -1 update player self y
-            #update grid with new position displaygrid()
-            print("up")
-        elif direction == "down":
-            print("down")
-        elif direction == "left":
-            print("left")
-        elif direction == "right":
-            print("right")
-        #update grid
+    def movePlayer(self, direction):
+        if direction == "up" and self.y > 0:
+            self.y -= 1
+        elif direction == "down" and self.y < len(gridMap) - 1:
+            self.y += 1
+        elif direction == "left" and self.x > 0:
+            self.x -= 1
+        elif direction == "right" and self.x < len(gridMap) - 1:
+            self.x += 1
+        else:
+            print("Invalid move")
+        updateGrid()
 
-# --// Procedures, Functions & Parameters \\--
 def createGrid(mapSize):
-    global gridMap  # Ensure gridMap is recognized as global
-    gridMap = []  # Reset gridMap for new grid
-    for i in range(mapSize):  # Creating the rows in the list
-        row = [" "] * mapSize  # Filling the row with spaces
-        gridMap.append(row)  # Appending the row to the gridMap
+    global gridMap
+    gridMap = [[" "] * mapSize for _ in range(mapSize)]
     displayGrid()
         
 def displayGrid():
-    for row in gridMap:  # Printing the grid
-        print("|".join(row))  # Print the grid in a formatted way
+    for row in gridMap:
+        print("|".join(row))
 
 def playerCreation(amount_of_players, mapSize):
     for i in range(amount_of_players):
         x, y = random.randrange(0, mapSize), random.randrange(0, mapSize)
-        # Ensure the position is empty
-        while gridMap[x][y] != " ":
+        while gridMap[y][x] != " ":
             x, y = random.randrange(0, mapSize), random.randrange(0, mapSize)
         
-        count = i + 1
-        players.append(Player(i, playerHealth, x, y, ))
-        gridMap[x][y] = str(count) # Place player on the grid
-        print(f"Player {i} created at ({x}, {y})")  # Print player position
+        players.append(Player(i, playerHealth, x, y))
+        gridMap[y][x] = str(i + 1)
+        print(f"Player {i + 1} created at ({x}, {y})")
+        
+def treasureCreation(amount_of_treasure, mapSize):
+    for i in range(amount_of_treasure):
+        x, y = random.randrange(0, mapSize), random.randrange(0, mapSize)
+        while gridMap[y][x] != " ":
+            x, y = random.randrange(0, mapSize), random.randrange(0, mapSize)
+        
+        players.append(Player(i, playerHealth, x, y))
+        gridMap[y][x] = str(i + 1)
+        print(f"Player {i + 1} created at ({x}, {y})")
 
 
-# --// Main Code \\--
+def updateGrid():
+    global gridMap
+    createGrid(len(gridMap))
+    for player in players:
+        gridMap[player.getY()][player.getX()] = str(player.id + 1)
+    displayGrid()
+
+# Main Code
 mapSize = int(input("Please enter a number for how big the grid shall be: "))
 createGrid(mapSize)
 
 amount_of_players = int(input("Enter the amount of players you would like: "))
 playerCreation(amount_of_players, mapSize)
 
-displayGrid()
+amount_of_treasure = int(input("Enter "))
 
-#turn order(rounds) while loop until win or death etc
-#for player in players etc
-#user input the direction/movement player[index].moveplayer(inpue("sadhkasjhdkajh"))
+while playerHealth > 0:
+    for player in players:
+        print(f"Player {player.id + 1}'s Turn")
+        time.sleep(2)
+        displayGrid()
+        direction = input("Please enter the direction you would like to go: 'Up', 'Down', 'Left' & 'Right' ").lower()
+        player.movePlayer(direction)
