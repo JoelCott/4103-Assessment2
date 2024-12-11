@@ -8,7 +8,7 @@ traps = []
 powerup = []
 winLocation = []
 treasureCount = 0
-playerHealth = 5
+playerHealth = 3
 
 class Player:
     def __init__(self, id, health, x, y):
@@ -179,23 +179,24 @@ def checkTraps(x, y, player):
                 powerup.pop()
                 traps.remove(i)
                 print(f"You have {len(powerup)} powerups left. Your health is currently on {player.health}")
-        if len(traps) != 0:
-            print(f"There is {len(traps)} trap(s) left in the game. Make sure you do not lose all your lives.")
-        else:
-            print("There are no more traps left in the game! Winning may be easier now!")
-        print("Continuing the game!")
+if len(traps) != 0:
+        print(f"There is {len(traps)} trap(s) left in the game. Make sure you do not lose all your lives.")
+else:
+    print("There are no more traps left in the game! Winning may be easier now!")
+print("Continuing the game!")
 
 def checkWin(x, y, player):
     global winLocation
     for i in winLocation:
         if x == i.getWX() and y == i.getWY():
-            print("Congratulations, you have completed the game. You have collected all the treasure, not lost all your lives, and got to the exit.")
-            print(f"Here are your stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players in game: {len(players)} \n Health: {player.health}")
-            time.sleep(2)
-            winLocation.remove(i)
-            print("Thank you for playing!")
-            quit()
-    print("Continuing game: You must collect all treasures to win the game.")
+            for player in players:
+                print("Congratulations, you have completed the game. You have collected all the treasure, not lost all your lives, and got to the exit.")
+                print(f"player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players ingame: {len(players)} \n Health: {player.health}")
+                time.sleep(2)
+                winLocation.remove(i)
+                print("Thank you for playing!")
+                quit()
+    print("Continuing game")
 
 def updateGrid():
     global gridMap
@@ -224,19 +225,27 @@ treasureCreation(amount_of_treasure, mapSize)
 amount_of_traps = int(input("Please enter a number of how many traps you would like in your game: "))
 trapCreation(amount_of_traps, mapSize)
 
+print("treasure",treasure)
+print("players",players)
+print("traps",traps)
+print("gridmap",gridMap)
+
 for player in players:
     while player.health != 0:
-        print(f"Player {player.id + 1}'s Turn") 
-        updateGrid()
-        time.sleep(2)
-        print("\n")
-        #displayGrid()
-        direction = input("Please enter the direction you would like to go: 'Up', 'Down', 'Left' & 'Right' ").lower()
-        player.movePlayer(direction)
-        checkTreasures(player.getX(), player.getY(), player)
-        checkTraps(player.getX(), player.getY(), player)
-        checkWin(player.getX(), player.getY(), player)
+        for player in players:
+            print(f"Player {player.id + 1}'s Turn") 
+            updateGrid()
+            time.sleep(2)
+            print("\n")
+            #displayGrid()
+            direction = input("Please enter the direction you would like to go: 'Up', 'Down', 'Left' & 'Right' ").lower()
+            player.movePlayer(direction)
+            checkTreasures(player.getX(), player.getY(), player)
+            checkTraps(player.getX(), player.getY(), player)
+            checkWin(player.getX(), player.getY(), player)
 print("\n")
-print(f"You have lost all your lives so the game is over! Here are your stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players ingame: {len(players)} \n Health: {player.health}")
-time.sleep(2)
-quit()
+print(f"Game Over - {player.id + 1} has lost their lives.")
+for player in players:
+    print(f"player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players ingame: {len(players)} \n Health: {player.health}")
+    time.sleep(2)
+    quit()
