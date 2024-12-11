@@ -125,6 +125,8 @@ def trapCreation(amount_of_traps, mapSize):
         traps.append(Traps(i, x, y))
         gridMap[y][x] = "X"
         print(f"Traps {i + 1} created at ({x}, {y})")
+        
+
 
 def checkTreasures(x, y, player):
     global treasure
