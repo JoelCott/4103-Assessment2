@@ -227,10 +227,6 @@ treasureCreation(amount_of_treasure, mapSize)
 amount_of_traps = int(input("Please enter a number of how many traps you would like in your game: "))
 trapCreation(amount_of_traps, mapSize)
 
-print("treasure",treasure)
-print("players",players)
-print("traps",traps)
-print("gridmap",gridMap)
 
 for player in players:
     while player.health != 0:
