@@ -1,5 +1,6 @@
 import time
 import random
+import math
 
 gridMap = []
 players = []
@@ -75,6 +76,14 @@ class Win:
     def getWY(self):
         return self.win_y
 
+def euclidean_distance(p1, p2):
+    return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
+
+def binarySearchT(player):
+    treasures = [[t.getTX(), t.getTY()] for t in treasure]
+    treasures.sort(key=lambda t: euclidean_distance([player.getX(), player.getY()], t))
+    return treasures[0] if treasures else None
+
 def createGrid(mapSize):
     global gridMap
     gridMap = [[" "] * mapSize for _ in range(mapSize)]
@@ -125,13 +134,12 @@ def trapCreation(amount_of_traps, mapSize):
         traps.append(Traps(i, x, y))
         gridMap[y][x] = "X"
         print(f"Traps {i + 1} created at ({x}, {y})")
-        
-
 
 def checkTreasures(x, y, player):
     global treasure
     for t in treasure:
         if x == t.getTX() and y == t.getTY():
+            treasure.remove(t)
             print("You have found some treasure! \n You can now choose the following items to obtain: \n 1. Health - Gain an extra life \n 2. Powerup - Immunity to a trap \n 3. Clues - Choice of search to find the treasure and complete the game.")
             time.sleep(3)
             userChoice = input("Please choose from 'health', 'powerup', 'clues': ").lower()
@@ -147,6 +155,10 @@ def checkTreasures(x, y, player):
                 userChoice2 = input("You now have a clue. Please choose between Binary Search, Depth first search or Breadth first search (BS, DFS, BFS)").lower()
                 if userChoice2 == "bs":
                     print("Loading Binary Search")
+                    nearestTreasure = binarySearchT(player)
+                    if nearestTreasure:
+                        print(f"The nearest treasure is at {nearestTreasure} for player {player.id + 1}")
+                        time.sleep(2)
                 elif userChoice2 == "dfs":
                     print("Loading Depth-First Search")
                 elif userChoice2 == "bfs":
@@ -155,7 +167,7 @@ def checkTreasures(x, y, player):
                     print("ERROR - Please enter the correct input.")
             else:
                 print("ERROR - You have miss inputted the data please try again.")
-            treasure.remove(t)
+            #treasure.remove(t)
             break
     if len(treasure) != 0:
         print(f"You have {len(treasure)} treasures left!")
@@ -177,15 +189,15 @@ def checkTraps(x, y, player):
                 time.sleep(3)
                 traps.remove(i)
             elif len(powerup) != 0:
-                print("You have a powerup. This means you are imune to this trap and you have not lost a life.")
+                print("You have a powerup. This means you are immune to this trap and you have not lost a life.")
                 powerup.pop()
                 traps.remove(i)
                 print(f"You have {len(powerup)} powerups left. Your health is currently on {player.health}")
-if len(traps) != 0:
+    if len(traps) != 0:
         print(f"There is {len(traps)} trap(s) left in the game. Make sure you do not lose all your lives.")
-else:
-    print("There are no more traps left in the game! Winning may be easier now!")
-print("Continuing the game!")
+    else:
+        print("There are no more traps left in the game! Winning may be easier now!")
+    print("Continuing the game!")
 
 def checkWin(x, y, player):
     global winLocation
@@ -193,7 +205,8 @@ def checkWin(x, y, player):
         if x == i.getWX() and y == i.getWY():
             for player in players:
                 print("Congratulations, you have completed the game. You have collected all the treasure, not lost all your lives, and got to the exit.")
-                print(f"player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players ingame: {len(players)} \n Health: {player.health}")
+
+                print(f"Player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players ingame: {len(players)} \n Health: {player.health}")
                 time.sleep(2)
                 winLocation.remove(i)
                 print("Thank you for playing!")
@@ -201,6 +214,7 @@ def checkWin(x, y, player):
     print("Continuing game")
 
 def updateGrid():
+
     global gridMap
     gridMap = [[" "] * len(gridMap) for _ in range(len(gridMap))]
     for player in players:
@@ -228,22 +242,25 @@ amount_of_traps = int(input("Please enter a number of how many traps you would l
 trapCreation(amount_of_traps, mapSize)
 
 
+while all(player.health > 0 for player in players):
+    for player in players:
+        if player.health <= 0:
+            continue
+        print(f"Player {player.id + 1}'s Turn") 
+        updateGrid()
+        time.sleep(2)
+        print("\n")
+        direction = input("Please enter the direction you would like to go: 'Up', 'Down', 'Left' & 'Right' ").lower()
+        player.movePlayer(direction)
+        checkTreasures(player.getX(), player.getY(), player)
+        checkTraps(player.getX(), player.getY(), player)
+        checkWin(player.getX(), player.getY(), player)
+
+print("\n Game Over")
 for player in players:
-    while player.health != 0:
-        for player in players:
-            print(f"Player {player.id + 1}'s Turn") 
-            updateGrid()
-            time.sleep(2)
-            print("\n")
-            #displayGrid()
-            direction = input("Please enter the direction you would like to go: 'Up', 'Down', 'Left' & 'Right' ").lower()
-            player.movePlayer(direction)
-            checkTreasures(player.getX(), player.getY(), player)
-            checkTraps(player.getX(), player.getY(), player)
-            checkWin(player.getX(), player.getY(), player)
-print("\n")
-print(f"Game Over - {player.id + 1} has lost their lives.")
-for player in players:
-    print(f"player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players ingame: {len(players)} \n Health: {player.health}")
+    nearestTreasure = binarySearchT(player)
+    if nearestTreasure:
+        print(f"The shortest path to find the treasure is at {nearestTreasure} for player {player.id + 1}")
+    print(f"Player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players in-game: {len(players)} \n Health: {player.health}")
     time.sleep(2)
-    quit()
+    print("\n")
