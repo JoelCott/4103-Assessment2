@@ -181,26 +181,26 @@ def checkTreasures(x, y, player): # Procedure checking if the user collected a t
                 if userChoice2 == "bs": # Checking if the user has chosen the binary search clue
                     print("Loading Binary Search") # Telling the user that they have chosen binary search
                     if len(treasure) > 0: # Checking if there are treasures on the map 
-                        nearestTreasure = binarySearchT(player)
-                        if nearestTreasure:
-                            print(f"The nearest treasure is at {nearestTreasure} for player {player.id + 1}")
-                            time.sleep(2)
-                        else:
-                            print("There is no treasure close enough to you!")
-                    else:
-                        print("There is no more treasure for you to search for!")
-                        time.sleep(2)
-                if userChoice2 == "dfs":
-                    print("Loading Depth-First Search")
-                    start_pos = (player.getX(), player.getY())
-                    if len(treasure) > 0:
-                        end_pos = (treasure[0].getTX(), treasure[0].getTY())  # Assuming single treasure for simplicity
-                        shortestPath = depthfirstSearch(gridMap, start_pos, end_pos)
-                        if shortestPath:
-                            print(f"The safest and shortest path to the treasure is at {shortestPath} for player {player.id + 1}")
-                        else:
-                            print(f"No safe path to treasure for Player {player.id + 1}")
-                    else:
+                        nearestTreasure = binarySearchT(player) # Running the binary search function and passing the players information through for their coordinates
+                        if nearestTreasure: # Checking if there is a nearest treasure
+                            print(f"The nearest treasure is at {nearestTreasure} for player {player.id + 1}") # Printing the nearest treasure to the players coordinates.
+                            time.sleep(2) # Pausing the program for 2 seconds so the user can read and work out where the next treasure is
+                        else: # If the first condition is not met do:
+                            print("There is no treasure close enough to you!") # Telling the user there is no treasure close to them
+                    else: # If there is no treasure left in the game
+                        print("There is no more treasure for you to search for!") # Telling the user there is no more treasure left
+                        time.sleep(2) # Pausing the game for 2 seconds
+                if userChoice2 == "dfs": # Checking if the user requested for the depth-first search
+                    print("Loading Depth-First Search") # Telling the user that the depth first search is loading
+                    start_pos = (player.getX(), player.getY()) # Getting the players position to get the starting position
+                    if len(treasure) > 0: # Checking if there is treasure in the game
+                        end_pos = (treasure[0].getTX(), treasure[0].getTY())  # Getting the treasure stored in position 0 for the end point
+                        shortestPath = depthfirstSearch(gridMap, start_pos, end_pos) # Running the function to find the shortest path to the available treasures
+                        if shortestPath: # Checking if the shortest path has been found
+                            print(f"The safest and shortest path to the treasure is at {shortestPath} for player {player.id + 1}") # Telling the player which path is the shortest to them
+                        else: # If the condition is not met do:
+                            print(f"No safe path to treasure for Player {player.id + 1}") # Telling the player that there is no safe path without landing in a trap
+                    else: # If the first condition has not been met do:
                         print("There are no treasues left for you to search for!")      
 
                 if userChoice2 == "bfs":
