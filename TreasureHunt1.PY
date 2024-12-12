@@ -1,16 +1,19 @@
-import time
-import random
-import math
+# --// Libraries, Variables & Services \\--
 
-gridMap = []
-players = []
-treasure = []
-traps = []
-powerup = []
-winLocation = []
-treasureCount = 0
-playerHealth = 3
+import time # Importing the time library so I can pause the program at certain points to give the user enough time to read what is being outputted to them
+import random # Importing the random library so I can have dynamic variables and find the range or have a random position entered for the objects to be inputted into the grid in random positions
+import math # Importing the math library so I can find the difference between the players position with the treasure whilst doing the binary search
 
+gridMap = [] # List used to store the size of the map 
+players = [] # List used to store the amount of players in the game
+treasure = [] # List used to store the amount of treasure in the game
+traps = [] # List used to store the amount of traps in the game
+powerup = [] # List used to store the amount of powerups a player has
+winLocation = [] # List used to store the win location once all treasure has been collected
+playerHealth = 3 # Variable used to store how much health each player starts with. This is static 
+
+
+# --// Object Oriented Programming - Classes & Methods, Attributes & Constructor Methods \\--
 class Player:
     def __init__(self, id, health, x, y):
         self.id = id
@@ -75,13 +78,14 @@ class Win:
 
     def getWY(self):
         return self.win_y
+# --// Procedures, Paramaters & Functions \\--
 
-def euclidean_distance(p1, p2):
+def distancebetweenPlayerandTreasure(p1, p2): 
     return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
 def binarySearchT(player):
     treasures = [[t.getTX(), t.getTY()] for t in treasure]
-    treasures.sort(key=lambda t: euclidean_distance([player.getX(), player.getY()], t))
+    treasures.sort(key=lambda t: distancebetweenPlayerandTreasure([player.getX(), player.getY()], t))
     return treasures[0] if treasures else None
 
 def createGrid(mapSize):
@@ -134,6 +138,26 @@ def trapCreation(amount_of_traps, mapSize):
         traps.append(Traps(i, x, y))
         gridMap[y][x] = "X"
         print(f"Traps {i + 1} created at ({x}, {y})")
+        
+def depthfirstSearch(grid, start, goal):
+    stack = [(start, [start])]
+    visited = set()
+
+    while stack:
+        (vertex, path) = stack.pop()
+        if vertex not in visited:
+            if vertex == goal:
+                return path
+            visited.add(vertex)
+            x, y = vertex
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # Up, Down, Left, Right
+                next_vertex = (x + dx, y + dy)
+                if 0 <= next_vertex[0] < len(grid) and 0 <= next_vertex[1] < len(grid[0]):
+                    if grid[next_vertex[0]][next_vertex[1]] not in ('X', 'T', 'W'):  # Avoid traps and visited spots
+                        stack.append((next_vertex, path + [next_vertex]))
+    return None
+
+
 
 def checkTreasures(x, y, player):
     global treasure
@@ -155,13 +179,30 @@ def checkTreasures(x, y, player):
                 userChoice2 = input("You now have a clue. Please choose between Binary Search, Depth first search or Breadth first search (BS, DFS, BFS)").lower()
                 if userChoice2 == "bs":
                     print("Loading Binary Search")
-                    nearestTreasure = binarySearchT(player)
-                    if nearestTreasure:
-                        print(f"The nearest treasure is at {nearestTreasure} for player {player.id + 1}")
+                    if len(treasure) > 0:
+                        nearestTreasure = binarySearchT(player)
+                        if nearestTreasure:
+                            print(f"The nearest treasure is at {nearestTreasure} for player {player.id + 1}")
+                            time.sleep(2)
+                        else:
+                            print("There is no treasure close enough to you!")
+                    else:
+                        print("There is no more treasure for you to search for!")
                         time.sleep(2)
-                elif userChoice2 == "dfs":
+                if userChoice2 == "dfs":
                     print("Loading Depth-First Search")
-                elif userChoice2 == "bfs":
+                    start_pos = (player.getX(), player.getY())
+                    if len(treasure) > 0:
+                        end_pos = (treasure[0].getTX(), treasure[0].getTY())  # Assuming single treasure for simplicity
+                        shortestPath = depthfirstSearch(gridMap, start_pos, end_pos)
+                        if shortestPath:
+                            print(f"The safest and shortest path to the treasure is at {shortestPath} for player {player.id + 1}")
+                        else:
+                            print(f"No safe path to treasure for Player {player.id + 1}")
+                    else:
+                        print("There are no treasues left for you to search for!")      
+
+                if userChoice2 == "bfs":
                     print("Loading Breadth-First Search")
                 else:
                     print("ERROR - Please enter the correct input.")
@@ -205,8 +246,30 @@ def checkWin(x, y, player):
         if x == i.getWX() and y == i.getWY():
             for player in players:
                 print("Congratulations, you have completed the game. You have collected all the treasure, not lost all your lives, and got to the exit.")
+                print("\n Game Over")
+                if len(treasure) > 0:
+                    nearestTreasure = binarySearchT(player)
+                    if nearestTreasure:
+                        print(f"The nearest treasure is at {nearestTreasure} for player {player.id + 1}")
+                        time.sleep(2)
+                    else:
+                        print("There is no treasure close enough to you!")
+                else:
+                    print(" Binary Search - There is no more treasure for you to search for!")
+                start_pos = (player.getX(), player.getY())
+                if len(treasure) > 0:
+                    end_pos = (treasure[0].getTX(), treasure[0].getTY())  # Assuming single treasure for simplicity
+                    shortestPath = depthfirstSearch(gridMap, start_pos, end_pos)
+                    if shortestPath:
+                        print(f"The safest and shortest path to the treasure is at {shortestPath} for player {player.id + 1}")
+                    else:
+                        print(f"No safe path to treasure for Player {player.id + 1}")
+                else:
+                    print(" Depth First Search - There are no treasues left for you to search for!") 
+                print(f"Player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players in-game: {len(players)} \n Health: {player.health}")
+                time.sleep(2)
+                print("\n")
 
-                print(f"Player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players ingame: {len(players)} \n Health: {player.health}")
                 time.sleep(2)
                 winLocation.remove(i)
                 print("Thank you for playing!")
@@ -228,7 +291,8 @@ def updateGrid():
     displayGrid()
     
 
-# Main Code
+# --// Main Code \\--
+
 mapSize = int(input("Please enter a number for how big the grid shall be (Entering 5 will create a 5x5 grid): "))
 createGrid(mapSize)
 
@@ -261,6 +325,15 @@ for player in players:
     nearestTreasure = binarySearchT(player)
     if nearestTreasure:
         print(f"The shortest path to find the treasure is at {nearestTreasure} for player {player.id + 1}")
+    else:
+        print(f" Binary Search - There was no short path to get treasure for player {player.id + 1}")
+    start_pos = (player.getX(), player.getY())
+    end_pos = (treasure[0].getTX(), treasure[0].getTY()) 
+    shortestPath = depthfirstSearch(gridMap, start_pos, end_pos)
+    if shortestPath:
+        print(f"The safest and shortest path to the treasure is at {shortestPath} for player {player.id + 1}")
+    else:
+        print(f"Depth First Search - There was no safe path for player {player.id + 1}")
     print(f"Player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players in-game: {len(players)} \n Health: {player.health}")
     time.sleep(2)
     print("\n")
