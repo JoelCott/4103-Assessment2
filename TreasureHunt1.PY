@@ -3,6 +3,7 @@
 import time # Importing the time library so I can pause the program at certain points to give the user enough time to read what is being outputted to them
 import random # Importing the random library so I can have dynamic variables and find the range or have a random position entered for the objects to be inputted into the grid in random positions
 import math # Importing the math library so I can find the difference between the players position with the treasure whilst doing the binary search
+from collections import deque # Importing the dequeue funcion from the collection to work with bfs
 
 gridMap = [] # List used to store the size of the map 
 players = [] # List used to store the amount of players in the game
@@ -10,7 +11,7 @@ treasure = [] # List used to store the amount of treasure in the game
 traps = [] # List used to store the amount of traps in the game
 powerup = [] # List used to store the amount of powerups a player has
 winLocation = [] # List used to store the win location once all treasure has been collected
-playerHealth = 3 # Variable used to store how much health each player starts with. This is static 
+playerHealth = 1 # Variable used to store how much health each player starts with. This is static 
 
 
 # --// Object Oriented Programming - Classes & Methods, Attributes & Constructor Methods \\--
@@ -158,6 +159,37 @@ def depthfirstSearch(grid, start, goal): # Function creating the depth first sea
                         stack.append((next_vertex, path + [next_vertex])) # adding the path to the stack
     return None # Returning void as the path will be displayed through a print further down once called upon.
 
+def shortestpathBFS(player): # Function finding the shortest path according to the player coordinates
+    if len(treasure) > 0: # Checking if there are treasures on the map 
+        start_pos = (player.getX(), player.getY()) # Getting the players x,y position
+        end_pos = (treasure[0].getTX(), treasure[0].getTY()) # Getting the treasures x,y position
+        shortestPath = breathfirstSearch(gridMap, start_pos, end_pos) # Passing all values into the BFS search
+        if shortestPath: # Checking if there is a shortest path
+            print(f"The shortest path to the treasure is at {shortestPath} for player {player.id + 1}") # Printing the shortest path to the correct player
+        else: # If there is no shortest path do:
+            print(f"Breadth First Search - There was no path to the treasure for player {player.id + 1}") # Telling the user that there is no shortest path avaialble.
+    else:
+        print("No treasures to search for BFS")
+
+def breathfirstSearch(grid, start, goal): # Function to find the shortest path of treasure using the breadth firt search
+    rows, cols = len(grid), len(grid[0]) # Getting the position of each row and column to check if any of them are the clostest path
+    queue = deque([(start, [start])]) # Removing the start positions from the queue once got
+    visited = set([start]) # Setting the starting position as visited so that its not included in the path
+    
+    while queue: # While the queue has the start position, running all the code below:
+        (x, y), path = queue.popleft() # Removing the x,y coordinates fom the queue as it ahs been visited
+        
+        if (x, y) == goal: # Checking if the current coordinates is the shortest path
+            return path # Returning the shortest path to the user
+        
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]: # Checking the player movements up, down, left right 
+            nx, ny = x + dx, y + dy # Setting the new x and y values to the shortest path
+            if 0 <= nx < rows and 0 <= ny < cols and (nx, ny) not in visited and grid[nx][ny] != 'X': # Checking if the row/column coordinates have been visited or not, also checking if they are filled with other items such as traps, it does not include that as it's only searching for treasure.
+                queue.append(((nx, ny), path + [(nx, ny)])) # Adding the shortest path to the queue
+                visited.add((nx, ny)) # Setting the new coordinates as visited.
+    
+    return None # Returning none as the search could not find the shortest path.
+
 
 
 def checkTreasures(x, y, player): # Procedure checking if the user collected a treasure
@@ -204,6 +236,8 @@ def checkTreasures(x, y, player): # Procedure checking if the user collected a t
                         print("There are no treasues left for you to search for!") # Telling the user that there is no more treasure left in the game so they cant use the clues 
 
                 if userChoice2 == "bfs": # Checking if the user requested the bredth first search
+                    for player in players: # Checking for all players stored in the player list
+                         shortestpathBFS(player) # Passing the player and their informaton into the search to find the shortest path
                     print("Loading Breadth-First Search") # Alerting the user that the bredth first search is loading
                 else: # If a different input was entered do:
                     print("ERROR - Please enter the correct input.") # Telling the user they have entered the wrong information
@@ -241,6 +275,8 @@ def checkTraps(x, y, player): # Procedure to check if the user has stepped on a 
         print("There are no more traps left in the game! Winning may be easier now!") # Printing to the user that they have no more traps left so they are able to win
     print("Continuing the game!") # Telling the user that the game is continuing
 
+
+
 def checkWin(x, y, player): # Function checking if a player has stood on the winning location
     global winLocation # Setting the winlocation list to global so it can be accessed anywhere (Only appended and deleted in this function)
     for i in winLocation: # Gathering the data of the win location
@@ -257,6 +293,8 @@ def checkWin(x, y, player): # Function checking if a player has stood on the win
                         print("There is no treasure close enough to you!") # Telling the user there is no treasure near by
                 else: # If there is no treasure left then:
                     print(" Binary Search - There is no more treasure for you to search for!") # Telling the user that the binary seach cannot find any treasure (This is always the output once the user has won)
+                for player in players: # Checking for all players stored in the player list
+                    shortestpathBFS(player) # Passing the player and their informaton into the search to find the shortest path
                 start_pos = (player.getX(), player.getY()) # Getting the players location for the starting position of the DFS search
                 if len(treasure) > 0: # Checking if there is any treasure in the game (Should be 0)
                     end_pos = (treasure[0].getTX(), treasure[0].getTY())  # Getting the end position by using the first position in the treasure list
@@ -325,6 +363,7 @@ while all(player.health > 0 for player in players): # Continous loop running the
 
 print("\n Game Over, You lost! Thank you for playing") # Telling the user that they have lost the game as one of the players health is 0
 for player in players: # Checking all the players in the game to output their statistics
+    shortestpathBFS(player) # Passing the player and their informaton into the search to find the shortest pat
     nearestTreasure = binarySearchT(player) # Function used to check the nearest treasure to each player
     if nearestTreasure: # If there was a nearest treasure then:
         print(f"The shortest path to find the treasure is at {nearestTreasure} for player {player.id + 1}") # Outputting the nearest treasure to each player
@@ -338,3 +377,4 @@ for player in players: # Checking all the players in the game to output their st
     else: # If there is not a safe path do:
         print(f"Depth First Search - There was no safe path for player {player.id + 1}") # Telling each user that there was no safe path and there may be a trap on the route
     print(f"Player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players in-game: {len(players)} \n Health: {player.health}") # Outputting to the user each players statistics at the end of the game
+    print("\n")
