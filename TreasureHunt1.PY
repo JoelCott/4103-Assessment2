@@ -201,140 +201,138 @@ def checkTreasures(x, y, player): # Procedure checking if the user collected a t
                         else: # If the condition is not met do:
                             print(f"No safe path to treasure for Player {player.id + 1}") # Telling the player that there is no safe path without landing in a trap
                     else: # If the first condition has not been met do:
-                        print("There are no treasues left for you to search for!")      
+                        print("There are no treasues left for you to search for!") # Telling the user that there is no more treasure left in the game so they cant use the clues 
 
-                if userChoice2 == "bfs":
-                    print("Loading Breadth-First Search")
-                else:
-                    print("ERROR - Please enter the correct input.")
-            else:
-                print("ERROR - You have miss inputted the data please try again.")
+                if userChoice2 == "bfs": # Checking if the user requested the bredth first search
+                    print("Loading Breadth-First Search") # Alerting the user that the bredth first search is loading
+                else: # If a different input was entered do:
+                    print("ERROR - Please enter the correct input.") # Telling the user they have entered the wrong information
+            else: # If any error at all occurs do:
+                print("ERROR - You have miss inputted the data please try again.") # Telling the user the program did not understand their input
             #treasure.remove(t)
-            break
-    if len(treasure) != 0:
-        print(f"You have {len(treasure)} treasures left!")
-    else:
-        print("You have no more treasures left!")
-        print("The exit/winning location will be revealed shortly. You may now get to that location to win!")
-        time.sleep(3)
-        winninglocationCreation(len(gridMap))
-        print("Continuing game: ")
+            break # Force ending the loop so the program will continue
+    if len(treasure) != 0: # Checking if there is any treasure in the game
+        print(f"You have {len(treasure)} treasures left!") # Alerting the user how much treasure is left for them to find
+    else: # If there is no treasure do:
+        print("You have no more treasures left!") # Telling the user they have no treasure left in the game
+        print("The exit/winning location will be revealed shortly. You may now get to that location to win!") # Alerting the user that the winning location will now be displayed
+        time.sleep(3) # Pausing the game for 2 seconds so that the user can read whats happening next
+        winninglocationCreation(len(gridMap)) # Running the function to create the the winning location
+        print("Continuing game: ") # Telling the user that the game is continuing
 
-def checkTraps(x, y, player):
-    global traps
-    for i in traps:
-        if x == i.getTrX() and y == i.getTrY():
-            if len(powerup) == 0:
-                print("You have now landed on a trap! You will now lose a life. Be careful!")
-                player.health -= 1
-                print(f"Your current lives: {player.health}")
-                time.sleep(3)
-                traps.remove(i)
-            elif len(powerup) != 0:
-                print("You have a powerup. This means you are immune to this trap and you have not lost a life.")
-                powerup.pop()
-                traps.remove(i)
-                print(f"You have {len(powerup)} powerups left. Your health is currently on {player.health}")
-    if len(traps) != 0:
-        print(f"There is {len(traps)} trap(s) left in the game. Make sure you do not lose all your lives.")
-    else:
-        print("There are no more traps left in the game! Winning may be easier now!")
-    print("Continuing the game!")
+def checkTraps(x, y, player): # Procedure to check if the user has stepped on a trap or not
+    global traps # Making the trap lsit global so that it can be accessed everywhere (Only appended or removed in this function only)
+    for i in traps: # Gathering all the different traps stored in the list
+        if x == i.getTrX() and y == i.getTrY(): # Checking if the users x,y coordinates are the same as any of the coordinates that the traps are on
+            if len(powerup) == 0: # Checking if the user has any powerups if not then:
+                print("You have now landed on a trap! You will now lose a life. Be careful!") # Alerting the user that they have landed on a trap
+                player.health -= 1 # Removing 1 life from the player which stood on the on the trap
+                print(f"Your current lives: {player.health}") # Telling the user how many lifes they have left
+                time.sleep(3) # Pausing the game for 3 seconds so the user can read their health levels
+                traps.remove(i) # Removing the specific trap which the player stood on so that it cannot be used again
+            elif len(powerup) != 0: # Checking if the players have any powerups at all if so then: (Users share powerups so that they can save eachothers lifes espeically if a player is on their final life)
+                print("You have a powerup. This means you are immune to this trap and you have not lost a life.") # Telling the user they have a powerup
+                powerup.pop() # Removing the powerup once used
+                traps.remove(i) # Removing the trap so that it cannot be used again
+                print(f"You have {len(powerup)} powerups left. Your health is currently on {player.health}") # Telling the user how many powerups are left and displaying their current health status
+    if len(traps) != 0: # Checking if there are any traps left if so do:
+        print(f"There is {len(traps)} trap(s) left in the game. Make sure you do not lose all your lives.") # Outputting to the user how many traps are left in the game
+    else: # If there are no traps then do:
+        print("There are no more traps left in the game! Winning may be easier now!") # Printing to the user that they have no more traps left so they are able to win
+    print("Continuing the game!") # Telling the user that the game is continuing
 
-def checkWin(x, y, player):
-    global winLocation
-    for i in winLocation:
-        if x == i.getWX() and y == i.getWY():
-            for player in players:
-                print("Congratulations, you have completed the game. You have collected all the treasure, not lost all your lives, and got to the exit.")
-                print("\n Game Over")
-                if len(treasure) > 0:
-                    nearestTreasure = binarySearchT(player)
-                    if nearestTreasure:
-                        print(f"The nearest treasure is at {nearestTreasure} for player {player.id + 1}")
-                        time.sleep(2)
-                    else:
-                        print("There is no treasure close enough to you!")
-                else:
-                    print(" Binary Search - There is no more treasure for you to search for!")
-                start_pos = (player.getX(), player.getY())
-                if len(treasure) > 0:
-                    end_pos = (treasure[0].getTX(), treasure[0].getTY())  # Assuming single treasure for simplicity
-                    shortestPath = depthfirstSearch(gridMap, start_pos, end_pos)
-                    if shortestPath:
-                        print(f"The safest and shortest path to the treasure is at {shortestPath} for player {player.id + 1}")
-                    else:
-                        print(f"No safe path to treasure for Player {player.id + 1}")
-                else:
-                    print(" Depth First Search - There are no treasues left for you to search for!") 
-                print(f"Player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players in-game: {len(players)} \n Health: {player.health}")
-                time.sleep(2)
-                print("\n")
+def checkWin(x, y, player): # Function checking if a player has stood on the winning location
+    global winLocation # Setting the winlocation list to global so it can be accessed anywhere (Only appended and deleted in this function)
+    for i in winLocation: # Gathering the data of the win location
+        if x == i.getWX() and y == i.getWY(): # Checking if a players coordinates are the same as the win locations coordinates
+            for player in players: # Getting the details of each individual player
+                print(f"Congratulations player {player.id + 1}, you have completed the game. You have collected all the treasure, you have also beat your opponents, not lost all your lives, and got to the exit.") # Alerting the user which player won the game
+                print("\n Game Over") # Telling the user that the game is over
+                if len(treasure) > 0: # Checking the amount of treasures (Should always be 0)
+                    nearestTreasure = binarySearchT(player) # Collecting the nearest treasure (Should not return)
+                    if nearestTreasure: # Checking if there is near by treasure
+                        print(f"The nearest treasure is at {nearestTreasure} for player {player.id + 1}") # Telling the user which treasure is near them
+                        time.sleep(2) # Pausing the game for 2 seconds
+                    else: # If no treasure is near them then do:
+                        print("There is no treasure close enough to you!") # Telling the user there is no treasure near by
+                else: # If there is no treasure left then:
+                    print(" Binary Search - There is no more treasure for you to search for!") # Telling the user that the binary seach cannot find any treasure (This is always the output once the user has won)
+                start_pos = (player.getX(), player.getY()) # Getting the players location for the starting position of the DFS search
+                if len(treasure) > 0: # Checking if there is any treasure in the game (Should be 0)
+                    end_pos = (treasure[0].getTX(), treasure[0].getTY())  # Getting the end position by using the first position in the treasure list
+                    shortestPath = depthfirstSearch(gridMap, start_pos, end_pos) # Finding the shortest path to each treasure
+                    if shortestPath: # If there is a safe and short path then do:
+                        print(f"The safest and shortest path to the treasure is at {shortestPath} for player {player.id + 1}") # Telling the user the shortest and safest path to them
+                    else: # If not then:
+                        print(f"No safe path to treasure for Player {player.id + 1}") # Telling the user there is no safe path and there is likely a trap on their route
+                else: # If no treasure do:
+                    print(" Depth First Search - There are no treasues left for you to search for!") # Telling the user that there is no treasure left in the game for the DFS search (Should always be the output as the user has won) 
+                print(f"Player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players in-game: {len(players)} \n Health: {player.health}") # Telling the user the statistics of each player
+                time.sleep(2) # Pausing the game for 2 seconds
+                print("\n") # Printing a gap
 
-                time.sleep(2)
-                winLocation.remove(i)
-                print("Thank you for playing!")
-                quit()
-    print("Continuing game")
+                time.sleep(2) # Pausing the game for 2 more seconds
+                winLocation.remove(i) # Removing the win lcoation from the grid
+                print("The game is over, We hope you enjoyed it!")
+                quit() # Ending the game
+    print("Continuing game") # If the user is not stood on the win location it will alert them that the game is continuing
 
-def updateGrid():
+def updateGrid(): # Function to update the grid with the latest movements
 
-    global gridMap
-    gridMap = [[" "] * len(gridMap) for _ in range(len(gridMap))]
-    for player in players:
-        gridMap[player.getY()][player.getX()] = str(player.id + 1)
-    for t in treasure:
-        gridMap[t.getTY()][t.getTX()] = "T"
-    for trap in traps:
-        gridMap[trap.getTrY()][trap.getTrX()] = "X"
-    for winLoc in winLocation:
-        gridMap[winLoc.getWY()][winLoc.getWX()] = "W"
-    displayGrid()
+    global gridMap # Setting the grid map to global so that in can be accessed by all the functions as it needs to for the game to work
+    gridMap = [[" "] * len(gridMap) for _ in range(len(gridMap))] # Setting the grid and making the empty spaces display an empty space
+    for player in players: # Checking the player list for the amount of players
+        gridMap[player.getY()][player.getX()] = str(player.id + 1) # Placing each player to their given coordinates from the class and setting the display as the players ID
+    for t in treasure: # Checking the treasure list for the amount of treasures
+        gridMap[t.getTY()][t.getTX()] = "T" # Placing each treasure to their given coordinates from the class and setting the display as a T
+    for trap in traps: # Checking the trap list for the amount of traps
+        gridMap[trap.getTrY()][trap.getTrX()] = "X" # Placing each trap to their given coordinates from the class and setting the dispkay as X
+    for winLoc in winLocation: # Checking the win list for the 1 win location
+        gridMap[winLoc.getWY()][winLoc.getWX()] = "W" # Placing the win location to its given coordinates from the class and setting the display as W
+    displayGrid() # Function to print the grid out with the latest information
     
 
 # --// Main Code \\--
 
-mapSize = int(input("Please enter a number for how big the grid shall be (Entering 5 will create a 5x5 grid): "))
-createGrid(mapSize)
+mapSize = int(input("Please enter a number for how big the grid shall be (Entering 5 will create a 5x5 grid): ")) # Asking the user to input the grid size
+createGrid(mapSize) # Fucntion creating the grid size by the user input
 
-amount_of_players = int(input("Enter the amount of players you would like: "))
-playerCreation(amount_of_players, mapSize)
+amount_of_players = int(input("Enter the amount of players you would like: ")) # Asking the user to input the amount of players they want in the game
+playerCreation(amount_of_players, mapSize) # Function creating the players and passing the mapsize
 
-amount_of_treasure = int(input("Enter the amount of treasure you would like in your game: "))
-treasureCreation(amount_of_treasure, mapSize)
+amount_of_treasure = int(input("Enter the amount of treasure you would like in your game: ")) # Asking the user to input the amount of treasure they want in the game
+treasureCreation(amount_of_treasure, mapSize) # Function creating the treasures and passing the mapsize
 
-amount_of_traps = int(input("Please enter a number of how many traps you would like in your game: "))
-trapCreation(amount_of_traps, mapSize)
+amount_of_traps = int(input("Please enter a number of how many traps you would like in your game: ")) # Asking the user to input the amount of traps they want in the game
+trapCreation(amount_of_traps, mapSize) # Function creating the traps and passing the mapsize
 
 
-while all(player.health > 0 for player in players):
-    for player in players:
-        if player.health <= 0:
-            continue
-        print(f"Player {player.id + 1}'s Turn") 
-        updateGrid()
-        time.sleep(2)
-        print("\n")
-        direction = input("Please enter the direction you would like to go: 'Up', 'Down', 'Left' & 'Right' ").lower()
-        player.movePlayer(direction)
-        checkTreasures(player.getX(), player.getY(), player)
-        checkTraps(player.getX(), player.getY(), player)
-        checkWin(player.getX(), player.getY(), player)
+while all(player.health > 0 for player in players): # Continous loop running the game until a player loses all their health
+    for player in players: # Checking the playerlist to see how many players are in the game and gatehring their details
+        if player.health <= 0: # Checking if any of the players does not have enough health
+            continue # Continuing the game so that each player gets a go before it ends as someone has lost all their lifes
+        print(f"Player {player.id + 1}'s Turn") # Alerting the user whose turn it is to move
+        updateGrid() # Function used to update the grid and re display it with the latest moves
+        time.sleep(2) # Pausing th game for 2 seconds
+        print("\n") # Printing a gap in the output
+        direction = input("Please enter the direction you would like to go: 'Up', 'Down', 'Left' & 'Right' ").lower() # Asking the user to decide what direction they want to move within the game
+        player.movePlayer(direction) # Moving the player the direction they chose based on whose go it is, this is ran through a function in the class
+        checkTreasures(player.getX(), player.getY(), player) # Checking if a player has collected any treasures by passing the players coordinates
+        checkTraps(player.getX(), player.getY(), player) # Checking if a player has stood on any traps by passing the players coordinates
+        checkWin(player.getX(), player.getY(), player) # Checking if a player has stood on the win location by passing the players coordinates
 
-print("\n Game Over")
-for player in players:
-    nearestTreasure = binarySearchT(player)
-    if nearestTreasure:
-        print(f"The shortest path to find the treasure is at {nearestTreasure} for player {player.id + 1}")
-    else:
-        print(f" Binary Search - There was no short path to get treasure for player {player.id + 1}")
-    start_pos = (player.getX(), player.getY())
-    end_pos = (treasure[0].getTX(), treasure[0].getTY()) 
-    shortestPath = depthfirstSearch(gridMap, start_pos, end_pos)
-    if shortestPath:
-        print(f"The safest and shortest path to the treasure is at {shortestPath} for player {player.id + 1}")
-    else:
-        print(f"Depth First Search - There was no safe path for player {player.id + 1}")
-    print(f"Player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players in-game: {len(players)} \n Health: {player.health}")
-    time.sleep(2)
-    print("\n")
+print("\n Game Over, You lost! Thank you for playing") # Telling the user that they have lost the game as one of the players health is 0
+for player in players: # Checking all the players in the game to output their statistics
+    nearestTreasure = binarySearchT(player) # Function used to check the nearest treasure to each player
+    if nearestTreasure: # If there was a nearest treasure then:
+        print(f"The shortest path to find the treasure is at {nearestTreasure} for player {player.id + 1}") # Outputting the nearest treasure to each player
+    else: # If there eas no short path available do:
+        print(f" Binary Search - There was no short path to get treasure for player {player.id + 1}") # Telling each user that there was no treasure close enough to them
+    start_pos = (player.getX(), player.getY()) # Getting the players coordinates to use as a starting position for the DFS search
+    end_pos = (treasure[0].getTX(), treasure[0].getTY()) # Getting the coordinates of the treasure to use as the end point
+    shortestPath = depthfirstSearch(gridMap, start_pos, end_pos) # Running the function with the suitable paramaters to find the shortest and safest path
+    if shortestPath: # Checking if there is a safe and short path
+        print(f"The safest and shortest path to the treasure is at {shortestPath} for player {player.id + 1}") # Telling each user that the safest and shortest path available to the treasure
+    else: # If there is not a safe path do:
+        print(f"Depth First Search - There was no safe path for player {player.id + 1}") # Telling each user that there was no safe path and there may be a trap on the route
+    print(f"Player {player.id + 1}'s game stats: \n Treasures left: {len(treasure)} \n Traps left: {len(traps)}, \n Players in-game: {len(players)} \n Health: {player.health}") # Outputting to the user each players statistics at the end of the game
