@@ -294,6 +294,8 @@ def updateGrid(): # Function to update the grid with the latest movements
 
 # --// Main Code \\--
 
+print("----**** Treasure Hunt ****---- \n Welcome to the treasure hunt game, you are stranded on an island with various treasures, powerups and clues you can find to escape the island. \n However there are multiple traps which will damage your health. \n If you have more than one player then the game because a race and it is the first player to escape. \n Good luck and have fun! ") # Displaying the game introduction to the player
+time.sleep(3) # Pausing the game for 3 seconds
 mapSize = int(input("Please enter a number for how big the grid shall be (Entering 5 will create a 5x5 grid): ")) # Asking the user to input the grid size
 createGrid(mapSize) # Fucntion creating the grid size by the user input
 
